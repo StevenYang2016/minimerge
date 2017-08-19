@@ -7,7 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <io.h>
+#include "uimerge.h"
 
+#define USING_VC
 
 typedef struct {
 
@@ -116,8 +118,6 @@ int merge(char *firstfile, char *secondfile,int pad, char *ofile) {
 		}
 	}
 
-
-
 	return 0;
 }
 
@@ -173,35 +173,55 @@ int htoi(char *s)
 	return ret;
 }
 
+void usage(void) {
+	printf("example : minimerge -i image.bin -c csf.bin -p e000 -o merged_file.bin \n");
+}
 
 
-int main(int argc,char * argv[])
+int main(int argc, char * argv[])
 {
-	char * image_file;
-	char * csf_file;
-	char * padaddr;
-	char * out_file;
-	int i,pad;
-
+	char * image_file = NULL;
+	char * csf_file = NULL;
+	char * padaddr = NULL;
+	char * out_file = NULL;
+	int i, pad, ret;
+	uimerge m_merge;
 	for (i = 1; i < argc; i = i + 2) {
 		if (!strcmp(argv[i], "-i")) {
-			image_file = argv[i+1];
+			image_file = argv[i + 1];
 		}
 		else if (!strcmp(argv[i], "-c")) {
-			csf_file = argv[i+1];
+			csf_file = argv[i + 1];
 		}
 		else if (!strcmp(argv[i], "-p")) {
-			padaddr = argv[i+1];
+			padaddr = argv[i + 1];
 		}
 		else if (!strcmp(argv[i], "-o")) {
-			out_file = argv[i+1];
+			out_file = argv[i + 1];
 		}
 
 	}
-	pad = htoi(padaddr);
-	merge(image_file, csf_file,pad,out_file);
-	///getchar();
+	if ((out_file == NULL) && (image_file == NULL) && (csf_file == NULL)) {
+		usage();
+	}
 
-	//padding(out_file, pad);
+	if (padaddr == NULL) {
+		pad = 0;
+	}
+	else {
+		pad = htoi(padaddr);
+	}
+
+#ifdef USING_VC
+	CString image(image_file);
+	CString csf(csf_file);
+	CString output(out_file);
+	ret=m_merge.merge(&image,&csf,&output,pad);
+	if (ret == 0) {
+		printf("Generate the merged file successfully\n");
+	}
+#else
+	merge(image_file, csf_file, pad, out_file);
+#endif
 	return 0;
 }

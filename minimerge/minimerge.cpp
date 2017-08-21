@@ -201,7 +201,7 @@ int main(int argc, char * argv[])
 		}
 
 	}
-	if ((out_file == NULL) && (image_file == NULL) && (csf_file == NULL)) {
+	if ((out_file == NULL) ||(image_file == NULL) || (csf_file == NULL)) {
 		usage();
 	}
 
